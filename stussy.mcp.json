@@ -1,0 +1,20 @@
+{
+  "schema_version": "v1",
+  "name": "Stussy AI",
+  "description": "E-commerce con IA para búsqueda semántica, recomendaciones y chat.",
+  "version": "1.0.0",
+  "author": "Emilio Roman",
+  "license": "MIT",
+  "api": {
+    "base_url": "http://127.0.0.1:8000",
+    "endpoints": {
+      "/products":  { "method": "GET",  "description": "Lista de productos" },
+      "/search":    { "method": "GET",  "params": { "q": "string" }, "description": "Búsqueda por texto" },
+      "/recommend": { "method": "GET",  "params": { "product_id": "int" }, "description": "Recomendaciones por ID" },
+      "/chat":      { "method": "POST", "body":  { "question": "string" }, "description": "Asistente conversacional local" },
+      "/agent":     { "method": "POST", "body":  { "action": "string", "query": "string", "product_id": "int", "category": "string", "max_price": "number", "in_stock": "boolean" }, "description": "Interfaz para agentes externos (search/recommend/chat) con filtros" }
+    }
+  },
+  "contact": { "email": "tuemail@ejemplo.com" },
+  "tags": ["AI","E-commerce","FastAPI","Recommender","Chatbot","MCP"]
+}

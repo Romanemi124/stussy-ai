@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Stussy · Futuristic E-commerce</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- NAV / TOPBAR -->
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a class="brand" href="#">
+        <!-- Marca con acento neon -->
+        <span class="brand__logo">⊹</span> Stussy<span>AI</span>
+      </a>
+      <nav class="nav">
+        <a href="#catalogo">Catálogo</a>
+        <a href="#busqueda">Buscar</a>
+        <a href="#about">Acerca</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO con efecto glass + neón -->
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <h1>La marca <span class="grad">Nº 1</span> del streetwear</h1>
+        <p>Descubre la nueva colección de la mano de Emilio Román</p>
+        <!--
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="#catalogo">Explorar</a>
+          <button class="btn btn--ghost" onclick="document.getElementById('q').focus()">Probar búsqueda</button>
+        </div>
+        -->
+        <div class="hero__stats">
+          <div><strong>+500</strong><small>productos</small></div>
+          <div><strong>IA</strong><small>recomendaciones</small></div>
+          <div><strong>RAG</strong><small>respuestas fiables</small></div>
+        </div>
+      </div>
+      <div class="hero__scene">
+        <!-- Panel pseudo-3D con luces -->
+        <div class="scene__glow"></div>
+        <div class="scene__grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEARCH / BÚSQUEDA -->
+  <section id="busqueda" class="search">
+    <div class="container">
+      <div class="search__bar glass">
+        <input id="q" type="search" placeholder="Busca: 'sudadera oversize', 'zapatillas running', 'algodón'…" />
+        <button class="btn btn--primary" onclick="doSearch()">Buscar</button>
+      </div>
+      <div id="search-results" class="grid"></div>
+    </div>
+  </section>
+
+  <!-- CATALOGO / CARDS -->
+  <section id="catalogo" class="catalog">
+    <div class="container">
+      <div class="section__head">
+        <h2>Catálogo</h2>
+        <p class="muted">Explora productos con estética urbana y deportiva.</p>
+      </div>
+      <div class="grid">
+        {% for p in products %}
+        <article class="card glass">
+          <div class="card__media">
+            <img src="{{ p.image }}" alt="{{ p.title }}" loading="lazy"/>
+            <div class="badge">Stock: {{ p.stock }}</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">{{ p.title }}</h3>
+            <p class="card__desc">{{ p.description }}</p>
+            <div class="card__meta">
+              <p><strong>{{ '%.2f'|format(p.price|float) }} €</strong></p>
+              <div class="card__actions">
+                <button class="btn btn--sm recs-btn" data-id="{{ p.id }}">Similares</button>
+              </div>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL de recomendaciones -->
+  <dialog id="recs-modal" class="modal">
+    <div class="modal__panel glass">
+      <div class="modal__head">
+        <h4>Te puede interesar</h4>
+        <button class="icon" onclick="closeRecs()">✕</button>
+      </div>
+      <div id="recs-list" class="grid grid--sm"></div>
+    </div>
+  </dialog>
+
+  <!-- FOOTER -->
+  <footer id="about" class="footer">
+    <div class="container footer__inner">
+      <p>© Stussy · E-commerce con IA (FastAPI)</p>
+      <small class="muted">© 2025 STÜSSY</small>
+    </div>
+  </footer>
+
+  <!-- JS mínimo para consumir la API -->
+<script>
+  // --- Búsqueda por palabra ---
+  async function doSearch() {
+    const term = document.getElementById('q').value.trim();
+    if (!term) return;
+    const res = await fetch(`/search?q=${encodeURIComponent(term)}`);
+    const data = await res.json();
+    const z = document.getElementById('search-results');
+    z.innerHTML = data.map(p => cardHTML(p)).join('');
+    window.location.hash = '#busqueda';
+  }
+
+  // --- Recomendaciones similares ---
+  async function recs(id){
+    const pid = String(id);
+    const res = await fetch(`/recommend?product_id=${encodeURIComponent(pid)}`);
+    const data = await res.json();
+
+    // Inserta las cards en el modal
+    document.getElementById('recs-list').innerHTML = data.map(p => cardHTML(p)).join('');
+    document.getElementById('recs-modal').showModal();
+  }
+
+  // --- Cerrar modal ---
+  function closeRecs(){
+    document.getElementById('recs-modal').close();
+  }
+
+  // --- Plantilla HTML de cada producto ---
+  function cardHTML(p){
+    return `
+      <article class="card glass">
+        <div class="card__media">
+          <img src="${p.image}" alt="${p.title}" loading="lazy"/>
+          <div class="badge">Stock: ${p.stock}</div>
+        </div>
+        <div class="card__body">
+          <h3 class="card__title">${p.title}</h3>
+          <p class="card__desc">${p.description}</p>
+          <div class="card__meta">
+            <span class="price">${Number(p.price).toFixed(2)} €</span>
+            <div class="card__actions">
+              <button class="btn btn--sm recs-btn" data-id="${p.id}">Similares</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  // Captura clicks en cualquier botón .recs-btn (servidor o cliente)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.recs-btn');
+    if (!btn) return;
+    const pid = btn.dataset.id;        // siempre string seguro
+    recs(pid);                         // la función ya lo normaliza a string
+  });
+</script>
+
+<!-- CHAT WIDGET -->
+<div id="stussy-chat" class="chat">
+  <button id="chat-toggle" class="chat__fab" aria-label="Abrir chat">💬</button>
+
+  <div class="chat__panel glass">
+    <div class="chat__head">
+      <strong>Stussy · Asistente</strong>
+      <button class="chat__close" aria-label="Cerrar" onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chat-messages" class="chat__msgs">
+      <div class="msg msg--bot">
+        <div class="msg__bubble">
+          ¡Hola! Soy tu asistente. Pregúntame por productos, estilos o precios. 😊
+        </div>
+      </div>
+    </div>
+
+    <form id="chat-form" class="chat__form" onsubmit="return sendChat(event)">
+      <input id="chat-input" type="text" placeholder="Escribe tu mensaje..." autocomplete="off" />
+      <button class="btn btn--primary" type="submit">Enviar</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Abrir/cerrar
+  function toggleChat() {
+    const panel = document.querySelector('.chat__panel');
+    panel.classList.toggle('is-open');
+    if (panel.classList.contains('is-open')) {
+      setTimeout(() => document.getElementById('chat-input').focus(), 150);
+    }
+  }
+  document.getElementById('chat-toggle').addEventListener('click', toggleChat);
+
+  // Enviar mensaje
+  async function sendChat(e){
+    e.preventDefault();
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if(!text) return false;
+
+    addUserMsg(text);
+    input.value = '';
+    addBotTyping();
+
+    try{
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({question: text})
+      });
+      const data = await res.json();
+      removeBotTyping();
+      addBotMsg(data.answer || '...');
+      if (Array.isArray(data.products) && data.products.length){
+        addProducts(data.products);
+      }
+    }catch(err){
+      removeBotTyping();
+      addBotMsg('Ups, ha habido un error. Intenta de nuevo.');
+      console.error(err);
+    }
+    return false;
+  }
+
+  // Render helpers
+  function addUserMsg(t){
+    const box = document.getElementById('chat-messages');
+    box.insertAdjacentHTML('beforeend', `
+      <div class="msg msg--user"><div class="msg__bubble">${escapeHtml(t)}</div></div>
+    `);
+    box.scrollTop = box.scrollHeight;
+  }
+  function addBotMsg(t){
+    const box = document.getElementById('chat-messages');
+    box.insertAdjacentHTML('beforeend', `
+      <div class="msg msg--bot"><div class="msg__bubble">${escapeHtml(t)}</div></div>
+    `);
+    box.scrollTop = box.scrollHeight;
+  }
+  function addBotTyping(){
+    const box = document.getElementById('chat-messages');
+    box.insertAdjacentHTML('beforeend', `
+      <div class="msg msg--bot" id="typing"><div class="msg__bubble">Escribiendo…</div></div>
+    `);
+    box.scrollTop = box.scrollHeight;
+  }
+  function removeBotTyping(){
+    const el = document.getElementById('typing');
+    if (el) el.remove();
+  }
+  function addProducts(items){
+    const box = document.getElementById('chat-messages');
+    const html = items.map(p => `
+      <div class="card glass chat__card">
+        <div class="card__media"><img src="${p.image}" alt="${p.title}"></div>
+        <div class="card__body">
+          <div class="card__title">${p.title}</div>
+          <div class="card__meta">
+            <span class="price">${Number(p.price).toFixed(2)} €</span>
+            <button class="btn btn--sm" onclick="recs('${p.id}')">Similares</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    box.insertAdjacentHTML('beforeend', `<div class="msg msg--bot"><div class="msg__grid">${html}</div></div>`);
+    box.scrollTop = box.scrollHeight;
+  }
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+</script>
+
+  <!--
+  <script>
+    async function doSearch() {
+      const term = document.getElementById('q').value.trim();
+      if (!term) return;
+      const res = await fetch(`/search?q=${encodeURIComponent(term)}`);
+      const data = await res.json();
+      const z = document.getElementById('search-results');
+      z.innerHTML = data.map(p => cardHTML(p)).join('');
+      window.location.hash = '#busqueda';
+    }
+
+    async function recs(id){
+        const pid = String(id); // convierte a string siempre
+        const res = await fetch(`/recommend?product_id=${encodeURIComponent(pid)}`);
+        const data = await res.json();
+        document.getElementById('recs').innerHTML =
+        data.map(p => `<div><strong>${p.title}</strong> - ${p.price}€</div>`).join("");
+    }
+
+    function closeRecs(){ document.getElementById('recs-modal').close(); }
+
+    function cardHTML(p){
+      return `
+      <article class="card glass">
+        <div class="card__media">
+          <img src="${p.image}" alt="${p.title}" loading="lazy"/>
+          <div class="badge">Stock: ${p.stock}</div>
+        </div>
+        <div class="card__body">
+          <h3 class="card__title">${p.title}</h3>
+          <p class="card__desc">${p.description}</p>
+          <div class="card__meta">
+            <span class="price">${Number(p.price).toFixed(2)} €</span>
+            <div class="card__actions">
+              <button class="btn btn--sm" onclick="recs(${p.id})">Similares</button>
+            </div>
+          </div>
+        </div>
+      </article>`;
+    }
+  </script>
+-->
+</body>
+</html>

@@ -1,0 +1,16 @@
+id,title,description,price,stock,tags,image
+1,Camiseta clásica Stussy,Camiseta 100% algodón con logo Stussy al frente,39.99,12,camiseta,/static/img/camiseta1.webp
+2,Sudadera Stussy Oversize,Sudadera con capucha y estampado trasero grande,69.99,8,sudadera,/static/img/sudadera1.webp
+3,Zapatillas Stussy x Nike,Zapatillas deportivas edición limitada,149.99,5,zapatillas,/static/img/zapatos1.webp
+4,Gorra Stussy Vintage,Gorra estilo retro con logo bordado,29.99,15,accesorio,/static/img/gorra1.webp
+5,Pantalón Stussy Cargo,Pantalón cargo con bolsillos laterales,89.99,10,pantalón,/static/img/pantalon1.webp
+6,Gorro Stussy Retro,Gorro estilo county,45,5,accesorio,/static/img/gorro1.webp
+7,Camiseta Stussy Tie-Dye,Camiseta con diseño tie-dye y logo frontal,44.99,20,camiseta,/static/img/camiseta2.jpg
+8,Sudadera Stussy Zip-Up,Sudadera con cremallera y diseño minimalista,59.99,4,sudadera,/static/img/sudadera2.jpg
+9,Zapatillas Stussy High-Top,Zapatillas altas con detalles exclusivos,159.99,7,zapatillas,/static/img/zapatos2.jpg
+10,Gorra Stussy Snapback,Gorra ajustable con diseño moderno,34.99,18,accesorio,/static/img/gorra2.jpg
+11,Pantalón Stussy Jogger,Pantalón jogger cómodo con logo estampado,79.99,14,pantalón,/static/img/pantalon2.webp
+12,Camiseta Stussy Graphic,Camiseta con gráfico artístico y logo,49.99,11,camiseta,/static/img/camiseta3.jpg
+13,Sudadera Stussy Pullover,Sudadera sin capucha con diseño clásico,64.99,6,sudadera,/static/img/sudadera3.jpg
+14,Gorro Stussy Beanie,Gorro de punto cálido y estilizado,39.99,9,accesorio,/static/img/gorro2.jpg
+
